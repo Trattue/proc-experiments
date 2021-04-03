@@ -2,6 +2,7 @@ use proc_experiments::{get_process_list, get_process_name};
 
 #[cfg(target_os = "windows")]
 fn main() {
+    // Print all currently known processes
     match get_process_list() {
         Ok(mut vec) => {
             vec.sort_unstable();
