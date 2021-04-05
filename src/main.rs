@@ -1,25 +1,27 @@
 extern crate dont_disappear;
 
-use std::process::exit;
-
 use dont_disappear::any_key_to_continue;
-use proc_experiments::{get_process_list, get_process_name};
+use proc_experiments::processes;
 
 #[cfg(target_os = "windows")]
 fn main() {
-    let mut process_list = get_process_list().unwrap_or_else(|err| {
-        eprintln!("{}", err);
-        exit(1);
-    });
+    let mut process_list = match processes::get_process_list() {
+        Ok(list) => list,
+        Err(e) => {
+            eprintln!("failed with {:?}", e);
+            return;
+        }
+    };
 
     // Prints a list of all currently known processes
     process_list.sort_unstable();
     process_list
         .iter()
-        .map(|pid| {
+        .map(|&pid| {
             (
-                *pid,
-                get_process_name(*pid).unwrap_or_else(|err| format!("ERROR: {}", err)),
+                pid,
+                processes::get_process_name(pid)
+                    .unwrap_or_else(|e| format!("failed with {:?} (permission denied?)", e)),
             )
         })
         .for_each(|(pid, name)| println!("PID {}: {}", pid, name));
