@@ -1,5 +1,8 @@
+extern crate dont_disappear;
+
 use std::process::exit;
 
+use dont_disappear::any_key_to_continue;
 use proc_experiments::{get_process_list, get_process_name};
 
 #[cfg(target_os = "windows")]
@@ -21,5 +24,5 @@ fn main() {
         })
         .for_each(|(pid, name)| println!("PID {}: {}", pid, name));
 
-    dont_disappear::any_key_to_continue::custom_msg("Press any key to continue...");
+    any_key_to_continue::custom_msg("Press any key to continue...");
 }
