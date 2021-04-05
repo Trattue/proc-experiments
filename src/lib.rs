@@ -1,6 +1,9 @@
 use std::mem;
 
-use bindings::Windows::Win32::{ProcessStatus, SystemServices};
+use bindings::Windows::Win32::{
+    ProcessStatus,
+    SystemServices::{self, BOOL, PROCESS_ACCESS_RIGHTS, PSTR},
+};
 
 fn fill_vec<T: Copy, F: Fn(&mut [T]) -> Result<usize, String>>(
     f: F,
@@ -8,7 +11,7 @@ fn fill_vec<T: Copy, F: Fn(&mut [T]) -> Result<usize, String>>(
     initial_capacity: usize,
 ) -> Result<Vec<T>, String> {
     let mut capacity = initial_capacity;
-    let mut vec: Vec<T>;
+    let mut vec;
     let mut size;
 
     loop {
@@ -61,11 +64,11 @@ pub fn get_process_name(pid: u32) -> Result<String, String> {
     let res = fill_vec(
         |arr: &mut [u8]| {
             // PROCESS_QUERY_INFORMATION is needed for K32GetModuleFileNameExA
-            let pac = SystemServices::PROCESS_ACCESS_RIGHTS(0x0400);
-            let inherit = SystemServices::BOOL::from(false);
+            let pac = PROCESS_ACCESS_RIGHTS(0x0400);
+            let inherit = BOOL::from(false);
             let handle = unsafe { SystemServices::OpenProcess(pac, inherit, pid) };
 
-            let arr_buffer = SystemServices::PSTR(arr.as_mut_ptr());
+            let arr_buffer = PSTR(arr.as_mut_ptr());
             let arr_bytes = mem::size_of_val(arr) as u32;
             let bytes_returned =
                 unsafe { ProcessStatus::K32GetModuleFileNameExA(handle, 0, arr_buffer, arr_bytes) };
